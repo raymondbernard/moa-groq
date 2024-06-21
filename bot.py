@@ -133,8 +133,8 @@ def main(
     }
 
     # Debug print statements
-    print("Initial Data Structure:")
-    print(data)
+    # print("Initial Data Structure:")
+    # print(data)
 
     num_proc = len(reference_models)
 
@@ -208,8 +208,8 @@ def main(
                 eval_set = datasets.Dataset.from_dict(data)
 
                 # Debug print statements
-                print(f"Data Structure After Round {i_round + 1}:")
-                print(data)
+                # print(f"Data Structure After Round {i_round + 1}:")
+                # print(data)
 
         console.print(
             "[cyan bold]Aggregating results & querying the aggregate model...[/cyan bold]"
