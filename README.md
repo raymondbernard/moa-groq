@@ -1,5 +1,5 @@
 
-# Ray Bernard modified the project to use Grog only 
+###  Ray Bernard modified the project to use Grog only 
 # Mixture-of-Agents Enhances Large Language Model Capabilities
 
 This is a fork of https://github.com/togethercomputer/MoA with some tweaks to make it work with local models.
