@@ -186,14 +186,14 @@ def main(
                 "model": reference_models,
             }
 
-        # Debug print statements
-        print("Data Structure Before Mapping:")
-        print(data)
+        # # Debug print statements
+        # print("Data Structure Before Mapping:")
+        # print(data)
 
         eval_set = datasets.Dataset.from_dict(data)
 
         with console.status("[bold green]Querying all the models...") as status:
-            for i_round in range(rounds):
+            for _ in range(rounds):
                 eval_set = eval_set.map(
                     partial(
                         process_fn,
@@ -201,7 +201,7 @@ def main(
                         max_tokens=max_tokens,
                     ),
                     batched=False,
-                    num_proc=1,  # Ensure no parallel processing
+                    num_proc=num_proc,  # Ensure no parallel processing
                 )
                 references = [item["output"] for item in eval_set]
                 data["references"] = references
@@ -214,10 +214,6 @@ def main(
         console.print(
             "[cyan bold]Aggregating results & querying the aggregate model...[/cyan bold]"
         )
-        
-        # Debug print statements
-        print("Aggregated Data Structure:")
-        print(data)
 
         output = generate_with_references(
             model=model,

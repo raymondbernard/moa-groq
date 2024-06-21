@@ -70,3 +70,4 @@ Please see https://github.com/togethercomputer/MoA/
 
 https://github.com/win4r and https://github.com/erik-sv
 
+Paper: https://arxiv.org/abs/2406.04692
