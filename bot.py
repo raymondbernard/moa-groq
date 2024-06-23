@@ -21,9 +21,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Set default values
-DEFAULT_MAX_TOKENS = 2048
-DEFAULT_TEMPERATURE = 0.7
-DEFAULT_ROUNDS = 1
+DEFAULT_MAX_TOKENS = os.getenv("DEFAULT_MAX_TOKENS")
+DEFAULT_TEMPERATURE =os.getenv("DEFAULT_TEMPERATURE")
+DEFAULT_ROUNDS = os.getenv("DEFAULT_ROUNDS")
 
 API_KEY = os.getenv("API_KEY")
 API_BASE = os.getenv("API_BASE")
@@ -231,23 +231,6 @@ def main(
         # Debug print statement
         print("Output received from generate_with_references:")
         print(output)
-
-        if isinstance(output, str):
-            print(f"Received string output: {output}")
-        elif isinstance(output, list):
-            for chunk in output:
-                if hasattr(chunk, 'choices'):
-                    out = chunk.choices[0].delta.content
-                    console.print(out, end="")
-                    if out is None:
-                        break
-                    all_output += out
-                else:
-                    print(f"Unexpected chunk format: {chunk}")
-        else:
-            print(f"Unexpected output type: {type(output)}")
-
-        print()
 
         if DEBUG:
             logger.info(
