@@ -1,6 +1,4 @@
 import os
-import copy
-import requests
 from loguru import logger
 from dotenv import load_dotenv
 from utils import generate_together, inject_references_to_messages, generate_with_references
