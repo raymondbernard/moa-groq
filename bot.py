@@ -75,13 +75,13 @@ def process_fn(
     max_tokens=MAX_TOKENS,
 ):
     references = item.get("references", [])
-    model_name = item["model"]
+    model = item["model"]
     messages = item["instruction"]
 
     while True:
         try:
             output = generate_with_references(
-                model_name=model_name,
+                model=model,
                 messages=messages,
                 references=references,
                 temperature=temperature,
@@ -97,7 +97,7 @@ def process_fn(
             else:
                 raise e
 
-    print(f"\nFinished querying [bold]{model_name}.[/bold]")
+    print(f"\nFinished querying [bold]{model}.[/bold]")
 
     return {"output": output}
 
@@ -194,7 +194,7 @@ def main(
         )
 
         output = generate_with_references(
-            model_name=model,
+            model=model,
             temperature=temperature,
             max_tokens=max_tokens,
             messages=data["instruction"][0],
