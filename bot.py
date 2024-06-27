@@ -3,8 +3,7 @@ from functools import partial
 from loguru import logger
 from utils import (
     generate_together,
-    generate_with_references,
-    DEBUG,
+    generate_with_references
 )
 import typer
 import os
@@ -15,31 +14,33 @@ from rich.prompt import Prompt
 from datasets.utils.logging import disable_progress_bar
 from time import sleep
 import requests
-
 from dotenv import load_dotenv
 
 load_dotenv()
 
 # Set default values
-DEFAULT_MAX_TOKENS = os.getenv("DEFAULT_MAX_TOKENS")
-DEFAULT_TEMPERATURE =os.getenv("DEFAULT_TEMPERATURE")
-DEFAULT_ROUNDS = os.getenv("DEFAULT_ROUNDS")
+DEFAULT_MAX_TOKENS = os.getenv("DEFAULT_MAX_TOKENS", "4096")
+DEFAULT_TEMPERATURE = os.getenv("DEFAULT_TEMPERATURE", "0.9")
+DEFAULT_ROUNDS = os.getenv("DEFAULT_ROUNDS", "1")
 
-API_KEY = os.getenv("API_KEY")
-API_BASE = os.getenv("API_BASE")
-
-API_KEY_2 = os.getenv("API_KEY_2")
-API_BASE_2 = os.getenv("API_BASE_2")
-
-MAX_TOKENS = int(os.getenv("MAX_TOKENS", DEFAULT_MAX_TOKENS))
-TEMPERATURE = float(os.getenv("TEMPERATURE", DEFAULT_TEMPERATURE))
-ROUNDS = int(os.getenv("ROUNDS", DEFAULT_ROUNDS))
+MAX_TOKENS = int(os.getenv("DEFAULT_MAX_TOKENS", DEFAULT_MAX_TOKENS))
+TEMPERATURE = float(os.getenv("DEFAULT_TEMPERATURE", DEFAULT_TEMPERATURE))
+ROUNDS = int(os.getenv("DEFAULT_ROUNDS", DEFAULT_ROUNDS))
 MULTITURN = os.getenv("MULTITURN") == "True"
 
 MODEL_AGGREGATE = os.getenv("MODEL_AGGREGATE")
 MODEL_REFERENCE_1 = os.getenv("MODEL_REFERENCE_1")
 MODEL_REFERENCE_2 = os.getenv("MODEL_REFERENCE_2")
 MODEL_REFERENCE_3 = os.getenv("MODEL_REFERENCE_3")
+
+LAYERS = int(os.getenv("LAYERS"))
+AGENTS_PER_LAYER = int(os.getenv("AGENTS_PER_LAYER"))
+
+default_reference_models = [
+    MODEL_REFERENCE_1,
+    MODEL_REFERENCE_2,
+    MODEL_REFERENCE_3,
+]
 
 disable_progress_bar()
 
@@ -68,25 +69,19 @@ The following LLMs as reference models, then passes the results to the aggregate
 """
 )
 
-default_reference_models = [
-    MODEL_REFERENCE_1,
-    MODEL_REFERENCE_2,
-    MODEL_REFERENCE_3,
-]
-
 def process_fn(
     item,
     temperature=TEMPERATURE,
     max_tokens=MAX_TOKENS,
 ):
     references = item.get("references", [])
-    model = item["model"]
+    model_name = item["model"]
     messages = item["instruction"]
 
     while True:
         try:
             output = generate_with_references(
-                model=model,
+                model_name=model_name,
                 messages=messages,
                 references=references,
                 temperature=temperature,
@@ -102,12 +97,7 @@ def process_fn(
             else:
                 raise e
 
-    if DEBUG:
-        logger.info(
-            f"model: {model}, instruction: {item['instruction']}, output: {output[:20]}"
-        )
-
-    print(f"\nFinished querying [bold]{model}.[/bold]")
+    print(f"\nFinished querying [bold]{model_name}.[/bold]")
 
     return {"output": output}
 
@@ -131,10 +121,6 @@ def main(
         "references": [""] * len(reference_models),
         "model": reference_models,
     }
-
-    # Debug print statements
-    # print("Initial Data Structure:")
-    # print(data)
 
     num_proc = len(reference_models)
 
@@ -186,10 +172,6 @@ def main(
                 "model": reference_models,
             }
 
-        # # Debug print statements
-        # print("Data Structure Before Mapping:")
-        # print(data)
-
         eval_set = datasets.Dataset.from_dict(data)
 
         with console.status("[bold green]Querying all the models...") as status:
@@ -207,16 +189,12 @@ def main(
                 data["references"] = references
                 eval_set = datasets.Dataset.from_dict(data)
 
-                # Debug print statements
-                # print(f"Data Structure After Round {i_round + 1}:")
-                # print(data)
-
         console.print(
             "[cyan bold]Aggregating results & querying the aggregate model...[/cyan bold]"
         )
 
         output = generate_with_references(
-            model=model,
+            model_name=model,
             temperature=temperature,
             max_tokens=max_tokens,
             messages=data["instruction"][0],
@@ -228,14 +206,9 @@ def main(
         print("\n")
         console.log(Markdown(f"## Final answer from {model}"))
 
-        # Debug print statement
         print("Output received from generate_with_references:")
         print(output)
 
-        if DEBUG:
-            logger.info(
-                f"model: {model}, instruction: {data['instruction'][0]}, output: {all_output[:20]}"
-            )
         if multi_turn:
             for i in range(len(reference_models)):
                 data["instruction"][i].append(
