@@ -141,9 +141,9 @@ def inject_references_to_messages(messages, references):
 
     return messages
 
-def generate_with_references(model_name, messages, references=[], max_tokens=MAX_TOKENS, temperature=TEMPERATURE, generate_fn=generate_together):
+def generate_with_references(model, messages, references=[], max_tokens=MAX_TOKENS, temperature=TEMPERATURE, generate_fn=generate_together):
     if len(references) > 0:
         messages = inject_references_to_messages(messages, references)
 
-    logger.info(f"Generating with references for model {model_name}")
-    return generate_fn(model_name, messages=messages, temperature=temperature, max_tokens=max_tokens)
+    logger.info(f"Generating with references for model {model}")
+    return generate_fn(model, messages=messages, temperature=temperature, max_tokens=max_tokens)
