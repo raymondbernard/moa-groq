@@ -6,8 +6,10 @@ from time import sleep
 from dotenv import load_dotenv
 from utils import generate_layered_response, generate_together, generate_with_references
 import requests 
+from dotenv import load_dotenv
 
 load_dotenv()
+
 
 # Set default values
 DEFAULT_MAX_TOKENS = os.getenv("DEFAULT_MAX_TOKENS", "4096")
