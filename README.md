@@ -24,7 +24,7 @@ We first present an interactive demo. It showcases a simple multi-turn chatbot w
 1. Setup your environment:
 
    ```shell
-   cp .env.example .env
+   cp .env.template .env
    vi .env
    ```
 
